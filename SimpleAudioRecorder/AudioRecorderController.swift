@@ -43,11 +43,12 @@ class AudioRecorderController: UIViewController {
         
         loadAudio()
         updateViews()
-        try? prepareAudioSession() // TODO: Handle case where on phone call and it fails.
+        try? prepareAudioSession() // TODO: handle case where on phone call and it fails
     }
 
     deinit {
-        // Protects us from a crash if the timer is still going when the user navigates away from the timer UI
+        // Protects us from a crash if the timer is still going when the user navigates away from the
+        // timer UI
         cancelTimer()
     }
 
@@ -56,6 +57,11 @@ class AudioRecorderController: UIViewController {
 
         let currentTime = audioPlayer?.currentTime ?? 0.0
         let duration = audioPlayer?.duration ?? 0.0
+        
+        // Rounding the duration prevents a glitch with labels updating at different times
+        // 3.1 = currentTime -> 3
+        // 7 = duration
+        // 3.7 = timeRemaining -> 4
         let timeRemaining = round(duration) - currentTime // Round allows them to be in sync UI wise
 
         timeElapsedLabel.text = timeIntervalFormatter.string(from: currentTime) ?? "00:00"
@@ -203,23 +209,23 @@ class AudioRecorderController: UIViewController {
         audioRecorder = try? AVAudioRecorder(url: recordingURL, format: format) // TODO: Error handling do/catch
         audioRecorder?.delegate = self
         audioRecorder?.isMeteringEnabled = true
-
         audioRecorder?.record()
         self.recordingURL = recordingURL
-        startTimer()
         updateViews()
+        
+        startTimer()
     }
     
     func stopRecording() {
         audioRecorder?.stop()
-        cancelTimer()
         updateViews()
+        cancelTimer()
     }
     
     // MARK: - Actions
     
     @IBAction func togglePlayback(_ sender: Any) {
-        if isPlaying {
+        if isPlaying { // isPlaying == true
             pause()
         } else {
             play()
@@ -259,7 +265,6 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
 }
 
 extension AudioRecorderController: AVAudioRecorderDelegate {
-
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         if flag,
             let recordingURL = recordingURL {
